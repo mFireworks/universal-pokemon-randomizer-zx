@@ -511,7 +511,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean megaEvolutionSanity = settings.isAbilitiesFollowMegaEvolutions();
         boolean weighDuplicatesTogether = settings.isWeighDuplicateAbilitiesTogether();
         boolean ensureTwoAbilities = settings.isEnsureTwoAbilities();
-        boolean doubleBattleMode = settings.isDoubleBattleMode();
+        boolean doubleBattleMode = false;//settings.isDoubleBattleMode();
 
         // Abilities don't exist in some games...
         if (this.abilitiesPerPokemon() == 0) {
@@ -2286,7 +2286,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void pickTrainerMovesets(Settings settings) {
         boolean isCyclicEvolutions = settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL;
-        boolean doubleBattleMode = settings.isDoubleBattleMode();
+        boolean doubleBattleMode = false;//settings.isDoubleBattleMode();
 
         List<Trainer> trainers = getTrainers();
 

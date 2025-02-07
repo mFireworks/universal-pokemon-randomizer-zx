@@ -187,7 +187,14 @@ public class Settings {
     private boolean consumableItemsOnlyForTrainerPokemon;
     private boolean sensibleItemsOnlyForTrainerPokemon;
     private boolean highestLevelOnlyGetsItemsForTrainerPokemon;
-    private boolean doubleBattleMode;
+    public enum BattleStyleMod {
+        UNCHANGED, RANDOM, SINGLE_STYLE
+    }
+    private BattleStyleMod battleStyleMod = BattleStyleMod.UNCHANGED;
+    public enum BattleStyles {
+        SINGLE_BATTLE, DOUBLE_BATTLE, TRIPLE_BATTLE, ROTATION_BATTLE
+    }
+    private BattleStyles singleStyleSelection = BattleStyles.SINGLE_BATTLE;
     private boolean shinyChance;
     private boolean betterTrainerMovesets;
 
@@ -527,8 +534,8 @@ public class Settings {
                 allowTrainerAlternateFormes,
                 allowWildAltFormes));
 
-        // 40 Double Battle Mode, Additional Boss/Important Trainer Pokemon, Weigh Duplicate Abilities
-        out.write((doubleBattleMode ? 0x1 : 0) |
+        // 40 (Legacy Double Battle Mode), Additional Boss/Important Trainer Pokemon, Weigh Duplicate Abilities
+        out.write((0) |
                 (additionalBossTrainerPokemon << 1) |
                 (additionalImportantTrainerPokemon << 4) |
                 (weighDuplicateAbilitiesTogether ? 0x80 : 0));
@@ -828,7 +835,11 @@ public class Settings {
         settings.setAllowTrainerAlternateFormes(restoreState(data[39],6));
         settings.setAllowWildAltFormes(restoreState(data[39],7));
 
-        settings.setDoubleBattleMode(restoreState(data[40], 0));
+        if (restoreState(data[40], 0)) {
+            // Legacy settings file. This bit used to be used for "Double Battle Only Mode"
+            settings.setBattleStyleMod(BattleStyleMod.SINGLE_STYLE);
+            settings.setSingleStyleSelection(BattleStyles.DOUBLE_BATTLE);
+        }
         settings.setAdditionalBossTrainerPokemon((data[40] & 0xE) >> 1);
         settings.setAdditionalImportantTrainerPokemon((data[40] & 0x70) >> 4);
         settings.setWeighDuplicateAbilitiesTogether(restoreState(data[40], 7));
@@ -1742,12 +1753,28 @@ public class Settings {
         this.highestLevelOnlyGetsItemsForTrainerPokemon = highestOnly;
     }
 
-    public boolean isDoubleBattleMode() {
-        return doubleBattleMode;
+    public BattleStyleMod getBattleStyleMod() {
+        return battleStyleMod;
     }
 
-    public void setDoubleBattleMode(boolean doubleBattleMode) {
-        this.doubleBattleMode = doubleBattleMode;
+    public void setBattleStyleMod(boolean... bools) {
+        setBattleStyleMod(getEnum(BattleStyleMod.class, bools));
+    }
+
+    public void setBattleStyleMod(BattleStyleMod mod) {
+        battleStyleMod = mod;
+    }
+
+    public BattleStyles getSingleStyleSelection() {
+        return singleStyleSelection;
+    }
+
+    public void setSingleStyleSelection(boolean... bools) {
+        setSingleStyleSelection(getEnum(BattleStyles.class, bools));
+    }
+
+    public void setSingleStyleSelection(BattleStyles style) {
+        singleStyleSelection = style;
     }
 
     public boolean isShinyChance() {
