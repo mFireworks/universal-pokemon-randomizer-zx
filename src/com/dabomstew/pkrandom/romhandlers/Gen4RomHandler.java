@@ -2909,7 +2909,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle) {
+    public void setTrainers(List<Trainer> trainerData, boolean processBattleStyle) {
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
             fixAbilitySlotValuesForHGSS(trainerData);
         }
@@ -2933,7 +2933,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
 
-                if (settingsBattleStyle.isBattleStyleChanged()) {
+                if (processBattleStyle) {
                     if (!tr.skipImportant()) {
                         // If we set this flag for partner trainers (e.g., Cheryl), then the double wild battles
                         // will turn into trainer battles with glitchy trainers.
@@ -3019,7 +3019,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
             // Then, also patch various subroutines that control the "Trainer Eye" event and text boxes
             // related to this in order to make double battles work on all trainers
-            if (settingsBattleStyle.isBattleStyleChanged()) {
+            if (processBattleStyle) {
                 String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.romType);
                 int offset = find(arm9, doubleBattleFixPrefix);
                 if (offset > 0) {

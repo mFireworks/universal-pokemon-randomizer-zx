@@ -1953,7 +1953,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, BattleStyle settingBattleStyle) {
+    public void setTrainers(List<Trainer> trainerData, boolean processBattleStyle) {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
@@ -1977,7 +1977,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // write out new data first...
             rom[trOffset] = (byte) tr.poketype;
             rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
-            if (settingBattleStyle.isBattleStyleChanged()) {
+            if (processBattleStyle) {
                 if (!tr.skipImportant()) {
                     if (tr.currBattleStyle.getStyle() == BattleStyle.Style.DOUBLE_BATTLE)
                         rom[trOffset + (entryLen - 16)] = 0x01;

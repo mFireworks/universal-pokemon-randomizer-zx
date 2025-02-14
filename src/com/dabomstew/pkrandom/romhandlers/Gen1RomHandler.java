@@ -1336,8 +1336,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
-    public void setTrainers(List<Trainer> trainerData, BattleStyle settingBattleStyle) {
-        // settingBattleStyle is unused since this generation only has single battles
+    public void setTrainers(List<Trainer> trainerData, boolean processBattleStyle) {
+        // processBattleStyle is unused since this generation only has single battles
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");

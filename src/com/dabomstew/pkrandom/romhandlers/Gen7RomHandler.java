@@ -1723,7 +1723,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle) {
+    public void setTrainers(List<Trainer> trainerData, boolean processBattleStyle) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             GARCArchive trainers = this.readGARC(romEntry.getFile("TrainerData"),true);
@@ -1740,7 +1740,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
 
-                if (settingsBattleStyle.isBattleStyleChanged()) {
+                if (processBattleStyle) {
                     if (!tr.skipImportant()) {
                         if (tr.currBattleStyle.getStyle() == BattleStyle.Style.DOUBLE_BATTLE) {
                             if (trainer[offset + 2] == 0) {

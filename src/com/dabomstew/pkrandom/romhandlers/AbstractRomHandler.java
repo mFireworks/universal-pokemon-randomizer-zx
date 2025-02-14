@@ -1954,7 +1954,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -2017,7 +2017,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, false);
     }
 
     private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset) {
@@ -2042,12 +2042,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void rivalCarriesStarter(Settings settings) {
+    public void rivalCarriesStarter() {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", isORAS ? 0 : 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -2074,7 +2074,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -2085,7 +2085,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t: currentTrainers) {
             applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -2145,7 +2145,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 t.pokemon.add(secondToLastIndex, newPokemon);
             }
         }
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, false);
     }
 
     private BattleStyle createTrainerStyle(BattleStyle style) {
@@ -2176,7 +2176,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 t.pokemon.add(t.pokemon.get(0).copy());
             }
         }
-        this.setTrainers(currentTrainers, settings.getBattleStyle());
+        this.setTrainers(currentTrainers, true);
     }
 
     private Map<Integer, List<MoveLearnt>> allLevelUpMoves;
@@ -2618,7 +2618,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        setTrainers(trainers, settings.getBattleStyle());
+        setTrainers(trainers, false);
     }
 
     private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean isMultiBattlesOnly) {
@@ -3875,7 +3875,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void metronomeOnlyMode(Settings settings) {
+    public void metronomeOnlyMode() {
 
         // movesets
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -3903,7 +3903,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        this.setTrainers(trainers, settings.getBattleStyle());
+        this.setTrainers(trainers, false);
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();

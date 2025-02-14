@@ -2021,7 +2021,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle) {
+    public void setTrainers(List<Trainer> trainerData, boolean processBattleStyle) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
         try {
@@ -2045,7 +2045,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
 
-                if (settingsBattleStyle.isBattleStyleChanged()) {
+                if (processBattleStyle) {
                     if (!tr.skipImportant()) {
                         switch (tr.currBattleStyle.getStyle()) {
                             case SINGLE_BATTLE:

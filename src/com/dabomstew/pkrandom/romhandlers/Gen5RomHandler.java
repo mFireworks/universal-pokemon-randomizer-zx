@@ -96,8 +96,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private List<StaticPokemon> staticPokemonFakeBall = new ArrayList<>();
         private List<RoamingPokemon> roamingPokemon = new ArrayList<>();
         private List<TradeScript> tradeScripts = new ArrayList<>();
-        
 
+        
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
                 numbers.put(key, 0);
@@ -1527,7 +1527,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle) {
+    public void setTrainers(List<Trainer> trainerData, boolean processBattleStyle) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             NARCArchive trainers = this.readNARC(romEntry.getFile("TrainerData"));
@@ -1546,7 +1546,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
 
-                if (settingsBattleStyle.isBattleStyleChanged()) {
+                if (processBattleStyle) {
                     if (!tr.skipImportant()) {
                         switch (tr.currBattleStyle.getStyle()) {
                             case SINGLE_BATTLE:
@@ -1623,7 +1623,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             this.writeNARC(romEntry.getFile("TrainerData"), trainers);
             this.writeNARC(romEntry.getFile("TrainerPokemon"), trpokes);
 
-            if (settingsBattleStyle.isBattleStyleChanged()) {
+            if (processBattleStyle) {
 
                 NARCArchive trainerTextBoxes = readNARC(romEntry.getFile("TrainerTextBoxes"));
                 byte[] data = trainerTextBoxes.files.get(0);

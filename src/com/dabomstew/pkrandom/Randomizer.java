@@ -468,7 +468,7 @@ public class Randomizer {
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
                 || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-            romHandler.rivalCarriesStarter(settings);
+            romHandler.rivalCarriesStarter();
             trainersChanged = true;
         }
 
@@ -516,7 +516,7 @@ public class Randomizer {
 
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.metronomeOnlyMode(settings);
+            romHandler.metronomeOnlyMode();
         }
 
         List<Trainer> trainers = romHandler.getTrainers();
