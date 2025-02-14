@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Version {
-    public static final int VERSION = 323; // Increment by 1 for new version. Updated for 4.6.1.
+    public static final int VERSION = 323; // Increment by 1 for new version. Updated for 4.6.2.
     public static final String VERSION_STRING = "4.6.2";
 
     public static final Map<Integer,String> oldVersions = setupVersionsMap();
