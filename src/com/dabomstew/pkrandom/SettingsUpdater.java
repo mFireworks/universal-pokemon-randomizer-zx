@@ -317,6 +317,16 @@ public class SettingsUpdater {
             dataBlock[50] |= ((oldMinimumCatchRate - 1) << 3);
         }
 
+        if (oldVersion < 322) {
+            // Introduced Battle Style Randomization.
+            // Get the old "Double Battle Only" state to initialize the data to.
+            byte initialState = 0;
+            if (((dataBlock[40] & 1)) == 0x01) { // is set to double battle mode
+                initialState = 0x14;
+            }
+            insertExtraByte(51, initialState);
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);

@@ -1394,8 +1394,21 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 int numPokes = trainer[3] & 0xFF;
                 int pokeOffs = 0;
                 tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
-                if (trainer[2] == 1) {
-                    originalDoubleTrainers.add(i);
+                int battleType = trainer[2] & 0xFF;
+                switch (battleType) {
+                    case 0:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.SINGLE_BATTLE);
+                        break;
+                    case 1:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.DOUBLE_BATTLE);
+                        originalDoubleTrainers.add(i);
+                        break;
+                    case 2:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.TRIPLE_BATTLE);
+                        break;
+                    case 3:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.ROTATION_BATTLE);
+                        break;
                 }
                 for (int poke = 0; poke < numPokes; poke++) {
                     // Structure is
@@ -1514,7 +1527,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             NARCArchive trainers = this.readNARC(romEntry.getFile("TrainerData"));
@@ -1533,12 +1546,35 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
 
-                if (doubleBattleMode) {
+                if (settingsBattleStyle.isBattleStyleChanged()) {
                     if (!tr.skipImportant()) {
-                        if (trainer[2] == 0) {
-                            trainer[2] = 1;
-                            trainer[12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                        switch (tr.currBattleStyle.getStyle()) {
+                            case SINGLE_BATTLE:
+                                if (trainer[2] != 0) {
+                                    trainer[2] = 0;
+                                    trainer[12] &= 0x7F; // convert AI back to single battles
+                                }
+                                break;
+                            case DOUBLE_BATTLE:
+                                if (trainer[2] != 1) {
+                                    trainer[2] = 1;
+                                    trainer[12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                                }
+                                break;
+                            case TRIPLE_BATTLE:
+                                if (trainer[2] != 2) {
+                                    trainer[2] = 2;
+                                    trainer[12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                                }
+                                break;
+                            case ROTATION_BATTLE:
+                                if (trainer[2] != 3) {
+                                    trainer[2] = 3;
+                                    trainer[12] |= 0x7F; // Rotation Battles use Single Battle Logic
+                                }
+                                break;
                         }
+
                     }
                 }
 
@@ -1587,7 +1623,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             this.writeNARC(romEntry.getFile("TrainerData"), trainers);
             this.writeNARC(romEntry.getFile("TrainerPokemon"), trpokes);
 
-            if (doubleBattleMode) {
+            if (settingsBattleStyle.isBattleStyleChanged()) {
 
                 NARCArchive trainerTextBoxes = readNARC(romEntry.getFile("TrainerTextBoxes"));
                 byte[] data = trainerTextBoxes.files.get(0);

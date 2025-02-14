@@ -511,7 +511,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean megaEvolutionSanity = settings.isAbilitiesFollowMegaEvolutions();
         boolean weighDuplicatesTogether = settings.isWeighDuplicateAbilitiesTogether();
         boolean ensureTwoAbilities = settings.isEnsureTwoAbilities();
-        boolean doubleBattleMode = false;//settings.isDoubleBattleMode();
+        boolean isMultiBattleOnly = settings.getBattleStyle().isOnlyMultiBattles();
 
         // Abilities don't exist in some games...
         if (this.abilitiesPerPokemon() == 0) {
@@ -536,7 +536,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (banBadAbilities) {
             bannedAbilities.addAll(GlobalConstants.badAbilities);
-            if (!doubleBattleMode) {
+            if (!isMultiBattleOnly) {
                 bannedAbilities.addAll(GlobalConstants.doubleBattleAbilities);
             }
         }
@@ -1954,7 +1954,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
     }
 
     @Override
@@ -2017,7 +2017,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
     }
 
     private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset) {
@@ -2042,12 +2042,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void rivalCarriesStarter() {
+    public void rivalCarriesStarter(Settings settings) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", isORAS ? 0 : 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
     }
 
     @Override
@@ -2074,7 +2074,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
     }
 
     @Override
@@ -2085,7 +2085,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t: currentTrainers) {
             applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
     }
 
     @Override
@@ -2145,19 +2145,38 @@ public abstract class AbstractRomHandler implements RomHandler {
                 t.pokemon.add(secondToLastIndex, newPokemon);
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
+    }
+
+    private BattleStyle createTrainerStyle(BattleStyle style) {
+        // Unchanged: passes style through
+        // Randomize: Select a random Style to use
+        // Single Style: passes style through, as the selected style is already picked.
+        BattleStyle trainerStyle = new BattleStyle(style.getModification(), style.getStyle());
+        if (trainerStyle.getModification() == BattleStyle.Modification.RANDOM) {
+            int styleCount = BattleStyle.Style.values().length;
+            if (generationOfPokemon() < 5 || generationOfPokemon() > 6)
+                styleCount = 2; // Remove triple & rotation as options
+            trainerStyle.setStyle(BattleStyle.Style.values()[random.nextInt(styleCount)]);
+        }
+        return trainerStyle;
     }
 
     @Override
-    public void doubleBattleMode() {
+    public void modifyBattleStyle(Settings settings) {
+        if (settings.getBattleStyle().getModification() == BattleStyle.Modification.UNCHANGED)
+            return;
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t: currentTrainers) {
-            if (t.pokemon.size() != 1 || t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
+            if (t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
                 continue;
             }
-            t.pokemon.add(t.pokemon.get(0).copy());
+            t.currBattleStyle = createTrainerStyle(settings.getBattleStyle());
+            while (t.pokemon.size() < t.currBattleStyle.getRequiredPokemonCount()) {
+                t.pokemon.add(t.pokemon.get(0).copy());
+            }
         }
-        this.setTrainers(currentTrainers, true);
+        this.setTrainers(currentTrainers, settings.getBattleStyle());
     }
 
     private Map<Integer, List<MoveLearnt>> allLevelUpMoves;
@@ -2286,7 +2305,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void pickTrainerMovesets(Settings settings) {
         boolean isCyclicEvolutions = settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL;
-        boolean doubleBattleMode = false;//settings.isDoubleBattleMode();
+        boolean isMultiBattleOnly = settings.getBattleStyle().isOnlyMultiBattles();
 
         List<Trainer> trainers = getTrainers();
 
@@ -2298,7 +2317,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 List<Move> movesAtLevel = getMoveSelectionPoolAtLevel(tp, isCyclicEvolutions);
 
-                movesAtLevel = trimMoveList(tp, movesAtLevel, doubleBattleMode);
+                movesAtLevel = trimMoveList(tp, movesAtLevel, isMultiBattleOnly);
 
                 if (movesAtLevel.isEmpty()) {
                     continue;
@@ -2599,10 +2618,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        setTrainers(trainers, false);
+        setTrainers(trainers, settings.getBattleStyle());
     }
 
-    private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean doubleBattleMode) {
+    private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean isMultiBattlesOnly) {
         int movesLeft = movesAtLevel.size();
 
         if (movesLeft <= 4) {
@@ -2619,7 +2638,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         movesAtLevel = movesAtLevel
                 .stream()
                 .filter(mv -> !GlobalConstants.uselessMoves.contains(mv.number) &&
-                        (doubleBattleMode || !GlobalConstants.doubleBattleMoves.contains(mv.number)))
+                        (isMultiBattlesOnly || !GlobalConstants.doubleBattleMoves.contains(mv.number)))
                 .collect(Collectors.toList());
 
         movesLeft = movesAtLevel.size();
@@ -3856,7 +3875,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void metronomeOnlyMode() {
+    public void metronomeOnlyMode(Settings settings) {
 
         // movesets
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -3884,7 +3903,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        this.setTrainers(trainers, false);
+        this.setTrainers(trainers, settings.getBattleStyle());
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();

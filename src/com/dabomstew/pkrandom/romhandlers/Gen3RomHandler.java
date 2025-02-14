@@ -1827,7 +1827,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             tr.trainerclass = (rom[trOffset + 2] & 0x80) > 0 ? 1 : 0;
 
             int pokeDataType = rom[trOffset] & 0xFF;
-            boolean doubleBattle = rom[trOffset + (entryLen - 16)] == 0x01;
+            if (rom[trOffset + (entryLen - 16)] == 0x01) {
+                tr.currBattleStyle.setStyle(BattleStyle.Style.DOUBLE_BATTLE);
+            }
             int numPokes = rom[trOffset + (entryLen - 8)] & 0xFF;
             int pointerToPokes = readPointer(trOffset + (entryLen - 4));
             tr.poketype = pokeDataType;
@@ -1951,7 +1953,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, BattleStyle settingBattleStyle) {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
@@ -1975,9 +1977,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // write out new data first...
             rom[trOffset] = (byte) tr.poketype;
             rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
-            if (doubleBattleMode) {
+            if (settingBattleStyle.isBattleStyleChanged()) {
                 if (!tr.skipImportant()) {
-                    rom[trOffset + (entryLen - 16)] = 0x01;
+                    if (tr.currBattleStyle.getStyle() == BattleStyle.Style.DOUBLE_BATTLE)
+                        rom[trOffset + (entryLen - 16)] = 0x01;
+                    else
+                        rom[trOffset + (entryLen - 16)] = 0x00;
                 }
             }
 

@@ -1920,6 +1920,20 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 tr.trainerclass = isORAS ? readWord(trainer,2) : trainer[1] & 0xFF;
                 int offset = isORAS ? 6 : 2;
                 int battleType = trainer[offset] & 0xFF;
+                switch (battleType) {
+                    case 0:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.SINGLE_BATTLE);
+                        break;
+                    case 1:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.DOUBLE_BATTLE);
+                        break;
+                    case 2:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.TRIPLE_BATTLE);
+                        break;
+                    case 3:
+                        tr.currBattleStyle.setStyle(BattleStyle.Style.ROTATION_BATTLE);
+                        break;
+                }
                 int numPokes = trainer[offset+1] & 0xFF;
                 boolean healer = trainer[offset+13] != 0;
                 int pokeOffs = 0;
@@ -2007,7 +2021,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
         try {
@@ -2031,11 +2045,33 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
 
-                if (doubleBattleMode) {
+                if (settingsBattleStyle.isBattleStyleChanged()) {
                     if (!tr.skipImportant()) {
-                        if (trainer[offset+2] == 0) {
-                            trainer[offset+2] = 1;
-                            trainer[offset+12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                        switch (tr.currBattleStyle.getStyle()) {
+                            case SINGLE_BATTLE:
+                                if (trainer[offset+2] != 0) {
+                                    trainer[offset+2] = 0;
+                                    trainer[offset+12] &= 0x7F; // convert AI back to single battles
+                                }
+                                break;
+                            case DOUBLE_BATTLE:
+                                if (trainer[offset+2] != 1) {
+                                    trainer[offset+2] = 1;
+                                    trainer[offset+12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                                }
+                                break;
+                            case TRIPLE_BATTLE:
+                                if (trainer[offset+2] != 2) {
+                                    trainer[offset+2] = 2;
+                                    trainer[offset+12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                                }
+                                break;
+                            case ROTATION_BATTLE:
+                                if (trainer[offset+2] != 3) {
+                                    trainer[offset+2] = 3;
+                                    trainer[offset+12] |= 0x7F; // Rotation Battles use Single Battle Logic
+                                }
+                                break;
                         }
                     }
                 }

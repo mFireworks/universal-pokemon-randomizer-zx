@@ -443,8 +443,8 @@ public class Randomizer {
         }
 
 
-        if (false /*settings.isDoubleBattleMode()*/) {
-            romHandler.doubleBattleMode();
+        if (settings.getBattleStyle().isBattleStyleChanged()) {
+            romHandler.modifyBattleStyle(settings);
             trainersChanged = true;
         }
 
@@ -468,7 +468,7 @@ public class Randomizer {
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
                 || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-            romHandler.rivalCarriesStarter();
+            romHandler.rivalCarriesStarter(settings);
             trainersChanged = true;
         }
 
@@ -516,7 +516,7 @@ public class Randomizer {
 
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.metronomeOnlyMode();
+            romHandler.metronomeOnlyMode(settings);
         }
 
         List<Trainer> trainers = romHandler.getTrainers();
@@ -1191,6 +1191,9 @@ public class Randomizer {
                     log.printf(tpk.toString(), itemNames[tpk.heldItem]);
                     first = false;
                 }
+            }
+            if (settings.getBattleStyle().isBattleStyleChanged()) {
+                log.printf(" (Battle Style: %s)", t.currBattleStyle.getStyle().toString());
             }
             log.println();
         }

@@ -249,7 +249,7 @@ public interface RomHandler {
 
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
-    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
+    void setTrainers(List<Trainer> trainerData, BattleStyle settingsBattleStyle);
 
     void randomizeTrainerPokes(Settings settings);
 
@@ -261,7 +261,7 @@ public interface RomHandler {
 
     List<Integer> getAllHeldItems();
 
-    void rivalCarriesStarter();
+    void rivalCarriesStarter(Settings settigs);
 
     boolean hasRivalFinalBattle();
 
@@ -271,7 +271,7 @@ public interface RomHandler {
 
     void addTrainerPokemon(Settings settings);
 
-    void doubleBattleMode();
+    void modifyBattleStyle(Settings settings);
 
     List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
 
@@ -323,7 +323,7 @@ public interface RomHandler {
 
     void orderDamagingMovesByDamage();
 
-    void metronomeOnlyMode();
+    void metronomeOnlyMode(Settings settings);
 
     boolean supportsFourStartingMoves();
 
