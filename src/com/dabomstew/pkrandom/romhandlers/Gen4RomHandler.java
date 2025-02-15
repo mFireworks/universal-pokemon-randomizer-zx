@@ -2825,7 +2825,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 tr.index = i;
                 int numPokes = trainer[3] & 0xFF;
                 int battleStyle = trainer[16] & 0xFF;
-                if (battleStyle == 1)
+                if (battleStyle != 0)
                     tr.currBattleStyle.setStyle(BattleStyle.Style.DOUBLE_BATTLE);
                 int pokeOffs = 0;
                 tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
